@@ -1,11 +1,11 @@
-%snlc_example  snlc example problem
+%snlc_example1  snlc example problem
 %
 % min sum(x.^3) + d'*x
 % s/t sum(x) == 1
 %     -1 <= x <= 1
 %
 
-function snlc_example
+function snlc_example1
 
   % settings
   n = 10;
@@ -50,6 +50,11 @@ function snlc_example
 
   % simple output
   fprintf('SNOPT returned exit code: %d\n',out.info);
+  
+  % clean up
+  if out.info == 1
+    snlc_clean(prob);
+  end
   
 end
 

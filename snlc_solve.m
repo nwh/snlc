@@ -57,11 +57,11 @@ function out = snlc_solve(varargin)
   in_parse.addParamValue('name','snlc-problem',@(x) ischar(x));
   in_parse.addParamValue('usrfun',[],@(x) isa(x,'function_handle'));
   in_parse.addParamValue('x0',[],@(x) isvector(x));
-  in_parse.addParamValue('bl',[],@(x) isvector(x));
-  in_parse.addParamValue('bu',[],@(x) isvector(x));
-  in_parse.addParamValue('A',[],@(x) ismatrix(x));
-  in_parse.addParamValue('cl',[],@(x) isvector(x));
-  in_parse.addParamValue('cu',[],@(x) isvector(x));
+  in_parse.addParamValue('bl',[],@(x) isvector(x) || isempty(x));
+  in_parse.addParamValue('bu',[],@(x) isvector(x) || isempty(x));
+  in_parse.addParamValue('A',[],@(x) ismatrix(x) || isempty(x));
+  in_parse.addParamValue('cl',[],@(x) isvector(x) || isempty(x));
+  in_parse.addParamValue('cu',[],@(x) isvector(x) || isempty(x));
   in_parse.addParamValue('summ_file','snlc_summ.txt',@(x) ischar(x));
   in_parse.addParamValue('prnt_file','snlc_prnt.txt',@(x) ischar(x));
   in_parse.addParamValue('spc_struct',[],@(x) isstruct(x) || isempty(x));
@@ -108,11 +108,44 @@ function out = snlc_solve(varargin)
   if isstruct(spc_struct)
     snlc_spc_write(spc_struct,prob.spc_file,prob.name);
   end
+
+  % snopt setup
+  snprint(prob.summ_file);
+  snsummary(prob.prnt_file);
+  
+  % for some reason the SNOPT examples all give the full path to the spc file.
+  spc_file_full = which(prob.spc_file);
+  snspec(spc_file_full);
+  
+  % get some data from snopt
+  infbnd = abs(sngetr('Infinite bound'));
+
+  % get problem size
+  nx = length(prob.x0);
+
+  % handle empty matrix
+  if isempty(prob.A)
+    prob.A = zeros(0,nx);
+  end
   
   % check input data
   [mA nA] = size(prob.A);
-  nx = length(prob.x0);
-  
+
+  % handle empty bounds
+  if isempty(prob.bl)
+    prob.bl = -(infbnd*1.1)*ones(nx,1);
+  end
+  if isempty(prob.bu)
+    prob.bu = (infbnd*1.1)*ones(nx,1);
+  end
+  if isempty(prob.cl)
+    prob.cl = -(infbnd*1.1)*ones(mA,1);
+  end
+  if isempty(prob.cu)
+    prob.cu = (infbnd*1.1)*ones(mA,1);
+  end
+
+  % check input sizes
   if nx ~= nA
     error('snlc_solve:input','sizes of x0 and A are inconsistent.')
   end
@@ -124,17 +157,6 @@ function out = snlc_solve(varargin)
   if mA ~= length(prob.cl) || mA ~= length(prob.cu)
     error('snlc_solve:input','incorrect size of cl or cu.');
   end
-  
-  % snopt setup
-  snprint(prob.summ_file);
-  snsummary(prob.prnt_file);
-  
-  % for some reason the SNOPT examples all give the full path to the spc file.
-  spc_file_full = which(prob.spc_file);
-  snspec(spc_file_full);
-  
-  % get some data from snopt
-  infbnd = abs(sngetr('Infinite bound'));
   
   % setup input data for snopt
   % please refer to the SNOPT documentation for info on these parameters.
