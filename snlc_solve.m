@@ -215,5 +215,7 @@ function out = snlc_solve(varargin)
   if isstruct(prob.spc_struct) && ~prob.spc_save
     snlc_spc_clean(prob.spc_file);
   end
+  clear global snlc_func_handle snlc_mA;
+  clear mex;
   
 end
