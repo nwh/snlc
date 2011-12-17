@@ -47,8 +47,9 @@ function snlc_example
   
   % call solver
   out = snlc_solve(prob);
-  
-  keyboard
+
+  % simple output
+  fprintf('SNOPT returned exit code: %d\n',out.info);
   
 end
 
