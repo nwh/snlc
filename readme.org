@@ -1,0 +1,5 @@
+SNLC - simplified interface to snopt to solve LC problems
+
+- Project started: <2011-12-14 Wed>
+- Author: Nick Henderson
+
