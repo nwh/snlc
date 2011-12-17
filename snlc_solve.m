@@ -105,8 +105,10 @@ function out = snlc_solve(varargin)
   end
   
   % write the spc file to disk if needed
+  clean_spc_file = false;
   if isstruct(spc_struct)
     snlc_spc_write(spc_struct,prob.spc_file,prob.name);
+    clean_spc_file = true;
   end
 
   % snopt setup
@@ -212,7 +214,7 @@ function out = snlc_solve(varargin)
   % clean up
   snprint off
   snsummary off
-  if isstruct(prob.spc_struct) && ~prob.spc_save
+  if clean_spc_file && ~prob.spc_save
     snlc_spc_clean(prob.spc_file);
   end
   clear global snlc_func_handle snlc_mA;
