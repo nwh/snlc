@@ -14,7 +14,7 @@ function snlc_example1
   % seed the rng
   RandStream.setDefaultStream(RandStream('mt19937ar','seed',rng_seed));
 
-  % generate c
+  % generate d
   d = randn(n,1);
   
   % generate problem data
@@ -40,10 +40,10 @@ function snlc_example1
   prob.bu = bu;
   prob.usrfun = usrfun;
   
+  % more options
+  prob.spc_save = 1;
+  
   % set up spec file
-  %spc.major_print_level = '1';
-  %spc.minor_print_level = '1';
-  %prob.spc = spc;
   
   % call solver
   out = snlc_solve(prob);

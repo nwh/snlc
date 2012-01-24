@@ -62,8 +62,8 @@ function out = snlc_solve(varargin)
   in_parse.addParamValue('A',[],@(x) ismatrix(x) || isempty(x));
   in_parse.addParamValue('cl',[],@(x) isvector(x) || isempty(x));
   in_parse.addParamValue('cu',[],@(x) isvector(x) || isempty(x));
-  in_parse.addParamValue('summ_file','snlc_summ.txt',@(x) ischar(x));
-  in_parse.addParamValue('prnt_file','snlc_prnt.txt',@(x) ischar(x));
+  in_parse.addParamValue('summ_file','snlc_summ.txt',@(x) ischar(x) && ~isempty(x));
+  in_parse.addParamValue('prnt_file','snlc_prnt.txt',@(x) ischar(x) && ~isempty(x));
   in_parse.addParamValue('spc_struct',[],@(x) isstruct(x) || isempty(x));
   in_parse.addParamValue('spc_file','snlc.spc', @(x) ischar(x) && ~isempty(x));
   in_parse.addParamValue('spc_save',false,@(x) ismember(x,[0,1]) || islogical(x));
@@ -179,9 +179,10 @@ function out = snlc_solve(varargin)
   iGfun = ones(nx,1); jGvar = (1:nx)';
   
   % prepare user objective function
-  global snlc_func_handle snlc_mA;
+  global snlc_func_handle snlc_mA snlc_fevcnt;
   snlc_func_handle = prob.usrfun;
   snlc_mA = mA;
+  snlc_fevcnt = 0;
   snlc_func_str = 'snlc_func';
   
   % run snopt
@@ -205,19 +206,20 @@ function out = snlc_solve(varargin)
   out.xstate = xstate;
   out.Fstate = Fstate;
   out.ns = ns;
+  out.fevcnt = snlc_fevcnt;
   out.ninf = ninf;
   out.sinf = sinf;
   out.mincw = mincw;
   out.miniw = miniw;
   out.minrw = minrw;
-  
+    
   % clean up
   snprint off
   snsummary off
   if clean_spc_file && ~prob.spc_save
     snlc_spc_clean(prob.spc_file);
   end
-  clear global snlc_func_handle snlc_mA;
+  clear global snlc_func_handle snlc_mA snlc_fevcnt;
   clear mex;
   
 end
